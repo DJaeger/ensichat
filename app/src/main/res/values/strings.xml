@@ -55,6 +55,11 @@
     <string name="contact_added">%1$s was added as a contact</string>
 
 
+    <!-- ChatFragment -->
+
+    <string name="bitcoin_wallet_not_found">Bitcoin wallet not found. Please install wallet app or select another wallet in the app settings.</string>
+
+
     <!-- SettingsActivity -->
 
     <!-- Activity title -->
@@ -65,6 +70,15 @@
 
     <!-- Preference title -->
     <string name="scan_interval_seconds">Scan Interval (seconds)</string>
+
+    <!-- Preference title -->
+    <string name="bitcoin_wallet">Bitcoin Wallet Application</string>
+
+    <!-- List of supported wallet apps -->
+    <string-array name="bitcoin_wallet_values">
+        <item>Bitcoin Wallet</item>
+        <item>Bitcoin Wallet for Testnet</item>
+    </string-array>
 
     <!-- Preference title (debug only)-->
     <string name="max_connections">Maximum Number of Connections</string>

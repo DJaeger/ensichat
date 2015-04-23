@@ -6,7 +6,7 @@ import com.nutomic.ensichat.util.BufferUtils
 
 object ResultAddContact {
 
-  val Type = 5
+  val Type = 2
 
   /**
    * Constructs [[ResultAddContact]] instance from byte array.

@@ -12,13 +12,11 @@ import com.nutomic.ensichat.R
 import com.nutomic.ensichat.bluetooth.BluetoothInterface
 import com.nutomic.ensichat.fragments.SettingsFragment
 import com.nutomic.ensichat.protocol.ChatService.{OnConnectionsChangedListener, OnMessageReceivedListener}
-import com.nutomic.ensichat.protocol.body.{UserName, MessageBody, ConnectionInfo}
+import com.nutomic.ensichat.protocol.body._
 import com.nutomic.ensichat.protocol.header.ContentHeader
-import com.nutomic.ensichat.util.{AddContactsHandler, Database, NotificationHandler}
+import com.nutomic.ensichat.util.{AddContactsHandler, Database, FutureHelper, NotificationHandler}
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object ChatService {
 
@@ -97,9 +95,9 @@ class ChatService extends Service {
     val pm = PreferenceManager.getDefaultSharedPreferences(this)
     if (pm.getString(SettingsFragment.KeyUserName, null) == null)
       pm.edit().putString(SettingsFragment.KeyUserName,
-        BluetoothAdapter.getDefaultAdapter.getName).apply()
+        BluetoothAdapter.getDefaultAdapter.getName.trim).apply()
 
-    Future {
+    FutureHelper.spawn {
       crypto.generateLocalKeys()
       registerMessageListener(database)
       registerMessageListener(notificationHandler)
@@ -137,13 +135,10 @@ class ChatService extends Service {
    * Sends a new message to the given target address.
    */
   def sendTo(target: Address, body: MessageBody): Unit = {
-    if (!btInterface.getConnections.contains(target))
-      return
-
     val sp = PreferenceManager.getDefaultSharedPreferences(this)
     val messageId = sp.getLong("message_id", 0)
     val header = new ContentHeader(crypto.localAddress, target, seqNumGenerator.next(),
-      body.contentType, messageId, new Date())
+      body.contentType, messageId, new Date(), true)
     sp.edit().putLong("message_id", messageId + 1)
 
     val msg = new Message(header, body)
@@ -181,12 +176,12 @@ class ChatService extends Service {
       if (database.getContact(msg.header.origin).nonEmpty)
         database.changeContactName(contact)
 
+      callMessageListeners(msg)
+    case _: InitiatePayment | _: PaymentInformation | _: RequestAddContact | _: ResultAddContact |
+         _: Text =>
+      callMessageListeners(msg)
+    case _: ConnectionInfo =>
       callConnectionListeners()
-    case _ =>
-      mainHandler.post(new Runnable {
-        override def run(): Unit =
-          messageListeners.foreach(_.onMessageReceived(msg))
-    })
   }
 
   /**
@@ -238,10 +233,13 @@ class ChatService extends Service {
    *
    * Should be called whenever a neighbor connects or disconnects.
    */
-  def callConnectionListeners(): Unit = {
-    connectionListeners
-      .foreach(_.onConnectionsChanged())
-  }
+  private def callConnectionListeners() =
+    connectionListeners.foreach(_.onConnectionsChanged())
+
+  private def callMessageListeners(msg: Message) =
+    mainHandler.post(new Runnable {
+      override def run(): Unit = messageListeners.foreach(_.onMessageReceived(msg))
+    })
 
   def connections() =
     btInterface.getConnections

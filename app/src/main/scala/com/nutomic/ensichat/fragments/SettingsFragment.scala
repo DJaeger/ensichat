@@ -15,6 +15,8 @@ object SettingsFragment {
   
   val KeyScanInterval = "scan_interval_seconds"
 
+  val KeyBitcoinWallet = "bitcoin_wallet"
+
   val MaxConnections = "max_connections"
 
   val Version = "version"
@@ -34,10 +36,12 @@ class SettingsFragment extends PreferenceFragment with OnPreferenceChangeListene
     addPreferencesFromResource(R.xml.settings)
     val name           = findPreference(KeyUserName)
     val scanInterval   = findPreference(KeyScanInterval)
+    val wallet         = findPreference(KeyBitcoinWallet)
     val maxConnections = findPreference(MaxConnections)
     val version        = findPreference(Version)
     name.setOnPreferenceChangeListener(this)
     scanInterval.setOnPreferenceChangeListener(this)
+    wallet.setOnPreferenceChangeListener(this)
     maxConnections.setOnPreferenceChangeListener(this)
     version.setSummary(getActivity.getPackageManager.getPackageInfo(
       getActivity.getPackageName, 0).versionName)
@@ -46,6 +50,8 @@ class SettingsFragment extends PreferenceFragment with OnPreferenceChangeListene
     name.setSummary(pm.getString(KeyUserName, ""))
     scanInterval.setSummary(pm.getString(KeyScanInterval,
       getResources.getString(R.string.default_scan_interval)))
+    wallet.setSummary(pm.getString(KeyBitcoinWallet,
+      getResources.getString(R.string.default_bitcoin_wallet)))
     maxConnections.setSummary(pm.getString(MaxConnections,
       getResources.getString(R.string.default_max_connections)))
   }
@@ -56,7 +62,8 @@ class SettingsFragment extends PreferenceFragment with OnPreferenceChangeListene
   override def onPreferenceChange(preference: Preference, newValue: AnyRef): Boolean = {
     if (preference.getKey == KeyUserName) {
       val service = getActivity.asInstanceOf[EnsiChatActivity].service
-      database.getContacts.foreach(c => service.sendTo(c.address, new UserName(newValue.toString)))
+      database.getContacts
+        .foreach(c => service.sendTo(c.address, new UserName(newValue.toString)))
     }
     preference.setSummary(newValue.toString)
     true

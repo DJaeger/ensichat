@@ -9,7 +9,7 @@ class UserNameTest extends AndroidTestCase {
     val name = new UserName("name")
     val bytes = name.write
     val body = UserName.read(bytes)
-    Assert.assertEquals(name, body.asInstanceOf[UserName])
+    Assert.assertEquals(name, body)
   }
 
 }

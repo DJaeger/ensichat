@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 
 object RequestAddContact {
 
-  val Type = 4
+  val Type = 1
 
   /**
    * Constructs [[RequestAddContact]] instance from byte array.

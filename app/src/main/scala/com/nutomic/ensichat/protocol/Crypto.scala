@@ -258,6 +258,8 @@ class Crypto(context: Context) {
       case ResultAddContact.Type  => ResultAddContact.read(decrypted)
       case Text.Type              => Text.read(decrypted)
       case UserName.Type          => UserName.read(decrypted)
+      case InitiatePayment.Type   => InitiatePayment.read(decrypted)
+      case PaymentInformation.Type    => PaymentInformation.read(decrypted)
     }
     new Message(msg.header, msg.crypto, body)
   }

@@ -16,6 +16,7 @@ dependencies {
     androidTestCompile "com.android.support:multidex-instrumentation:1.0.1", { exclude module: "multidex" }
     compile "org.scala-lang:scala-library:2.11.6"
     compile 'com.google.guava:guava:18.0'
+    // TODO: use @aar maven dependency for bitcoin
 }
 
 android {

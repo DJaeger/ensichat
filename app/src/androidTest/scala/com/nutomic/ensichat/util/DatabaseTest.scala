@@ -6,12 +6,11 @@ import android.content.Context
 import android.database.DatabaseErrorHandler
 import android.database.sqlite.SQLiteDatabase
 import android.test.{AndroidTestCase, mock}
-import com.nutomic.ensichat.protocol.{MessageTest, UserTest}
-import com.nutomic.ensichat.protocol.body.CryptoData
-import com.nutomic.ensichat.protocol.header.ContentHeaderTest
+import com.nutomic.ensichat.protocol.MessageTest._
+import com.nutomic.ensichat.protocol.body.{CryptoData, PaymentInformation}
 import com.nutomic.ensichat.protocol.header.ContentHeader
-import ContentHeaderTest._
-import MessageTest._
+import com.nutomic.ensichat.protocol.header.ContentHeaderTest._
+import com.nutomic.ensichat.protocol.{AddressTest, Message, UserTest}
 import com.nutomic.ensichat.util.Database.OnContactsUpdatedListener
 import junit.framework.Assert._
 
@@ -71,7 +70,7 @@ class DatabaseTest extends AndroidTestCase {
     assertTrue(msg.contains(m3))
   }
 
-  def testMessageFields(): Unit = {
+  def testTextMessage(): Unit = {
     val msg = database.getMessages(m3.header.target, 1).firstKey
     val header = msg.header.asInstanceOf[ContentHeader]
 
@@ -81,8 +80,23 @@ class DatabaseTest extends AndroidTestCase {
     assertEquals(h3.contentType, header.contentType)
     assertEquals(h3.messageId, header.messageId)
     assertEquals(h3.time, header.time)
+    assertEquals(h3.read, header.read)
     assertEquals(new CryptoData(None, None), msg.crypto)
     assertEquals(m3.body, msg.body)
+  }
+
+  def testPaymentRequestMessage(): Unit = {
+    val pr = new PaymentInformation("teststring".getBytes)
+    val msg = new Message(h6, pr)
+    database.onMessageReceived(msg)
+    val retrieved = database.getMessages(h6.origin, 1).firstKey
+    assertEquals(pr, retrieved.body)
+  }
+
+  def testMessageRead(): Unit = {
+    database.setMessageRead(h3)
+    val header = database.getMessages(AddressTest.a4, 1).firstKey.header.asInstanceOf[ContentHeader]
+    assertTrue(header.read)
   }
 
   def testAddContact(): Unit = {

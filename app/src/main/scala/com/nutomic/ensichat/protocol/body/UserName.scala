@@ -1,12 +1,13 @@
 package com.nutomic.ensichat.protocol.body
 
 import java.nio.ByteBuffer
+
 import com.nutomic.ensichat.protocol.Message
 import com.nutomic.ensichat.util.BufferUtils
 
 object UserName {
 
-  val Type = 7
+  val Type = 4
 
   /**
    * Constructs [[UserName]] instance from byte array.

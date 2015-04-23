@@ -4,8 +4,8 @@ import android.content.Context
 import android.view.{Gravity, View, ViewGroup}
 import android.widget.{ArrayAdapter, RelativeLayout, TextView}
 import com.nutomic.ensichat.R
-import com.nutomic.ensichat.protocol.{Message, Address}
-import com.nutomic.ensichat.protocol.body.Text
+import com.nutomic.ensichat.protocol.body.{InitiatePayment, PaymentInformation, Text}
+import com.nutomic.ensichat.protocol.{Address, Message}
 
 /**
  * Displays [[Message]]s in ListView.
@@ -22,7 +22,12 @@ class MessagesAdapter(context: Context, remoteAddress: Address) extends
     val view = super.getView(position, convertView, parent).asInstanceOf[RelativeLayout]
     val tv = view.findViewById(android.R.id.text1).asInstanceOf[TextView]
 
-    tv.setText(getItem(position).body.asInstanceOf[Text].text)
+    getItem(position).body match {
+      case t: Text => tv.setText(t.text)
+      // TODO: proper design, show amount?
+      case ip: InitiatePayment => tv.setText("InitiatePayment")
+      case pr: PaymentInformation => tv.setText("PaymentInformation")
+    }
 
     val lp = new RelativeLayout.LayoutParams(tv.getLayoutParams)
     val margin = (MessageMargin * context.getResources.getDisplayMetrics.density).toInt
